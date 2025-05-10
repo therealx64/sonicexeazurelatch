@@ -26,22 +26,23 @@ local replacements = {
     },
     {
         oldAnimId = "rbxassetid://135752742267018",
-        newAnimId = "rbxassetid://135752742267018",
+        newAnimId = "rbxassetid://116455589260954",
         soundId = "rbxassetid://130820040577966",
         lastPlayed = 0,
         moveForward = false,
         canTeleport = true
+    },
+    {
+        oldAnimId = "rbxassetid://73786427576386",
+        newAnimId = "rbxassetid://90781949061659",
+        soundId = "rbxassetid://125906215069324",
+        lastPlayed = 0,
+        moveForward = false,
+        canPlay = true,
+        animationSpeed = 1, 
+        soundSpeed = 1      
     }
 }
-
-local function playSound(soundId)
-    local sound = Instance.new("Sound")
-    sound.SoundId = soundId
-    sound.Volume = 1
-    sound.PlayOnRemove = true
-    sound.Parent = character:FindFirstChild("HumanoidRootPart") or character
-    sound:Destroy()
-end
 
 local function replaceAnimations()
     local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -52,41 +53,73 @@ local function replaceAnimations()
             if track.Animation and track.Animation.AnimationId == config.oldAnimId then
                 local currentTime = tick()
 
-                if config == replacements[1] then
-                    if currentTime - config.lastPlayed > 3 and config.canPlay then
-                        local newAnimation = Instance.new("Animation")
-                        newAnimation.AnimationId = config.newAnimId
-                        local newTrack = humanoid:LoadAnimation(newAnimation)
-                        newTrack:Play()
+                if config == replacements[1] and currentTime - config.lastPlayed > 3 and config.canPlay then
+                    local newAnimation = Instance.new("Animation")
+                    newAnimation.AnimationId = config.newAnimId
+                    local newTrack = humanoid:LoadAnimation(newAnimation)
+                    newTrack:Play()
 
-                        playSound(config.soundId)
-                        config.lastPlayed = currentTime
-                        config.canPlay = false
+                    local sound = Instance.new("Sound")
+                    sound.SoundId = config.soundId
+                    sound.Volume = 1
+                    sound.PlayOnRemove = true
+                    sound.Parent = character:FindFirstChild("HumanoidRootPart") or character
+                    sound:Destroy()
+
+                    config.lastPlayed = currentTime
+                    config.canPlay = false
+                end
+
+                if config == replacements[2] and currentTime - config.lastPlayed > 3 and config.canPlay then
+                    local newAnimation = Instance.new("Animation")
+                    newAnimation.AnimationId = config.newAnimId
+                    local newTrack = humanoid:LoadAnimation(newAnimation)
+                    newTrack:Play()
+
+                    local sound = Instance.new("Sound")
+                    sound.SoundId = config.soundId
+                    sound.Volume = 1
+                    sound.PlayOnRemove = true
+                    sound.Parent = character:FindFirstChild("HumanoidRootPart") or character
+                    sound:Destroy()
+
+                    config.lastPlayed = currentTime
+                    config.canPlay = false
+
+                    movingForward = true
+                    moveEndTime = currentTime + 3
+                end
+
+                if config == replacements[3] and currentTime - config.lastPlayed > 3 and config.canTeleport then
+                    local ballModel = workspace.Terrain:WaitForChild("Ball")
+                    local ballShadow = ballModel:WaitForChild("ballshadow")
+                    local rootPart = character:WaitForChild("HumanoidRootPart")
+                    rootPart.CFrame = ballShadow.CFrame * CFrame.new(0, -5, 0)
+
+                    config.lastPlayed = currentTime
+                    config.canTeleport = false
+                end
+
+                if config == replacements[4] and currentTime - config.lastPlayed > 3 and config.canPlay then
+                    local newAnimation = Instance.new("Animation")
+                    newAnimation.AnimationId = config.newAnimId
+                    local newTrack = humanoid:LoadAnimation(newAnimation)
+                    newTrack:Play()
+
+                    if config.animationSpeed then
+                        newTrack:AdjustSpeed(config.animationSpeed)
                     end
-                elseif config == replacements[2] then
-                    if currentTime - config.lastPlayed > 3 and config.canPlay then
-                        local newAnimation = Instance.new("Animation")
-                        newAnimation.AnimationId = config.newAnimId
-                        local newTrack = humanoid:LoadAnimation(newAnimation)
-                        newTrack:Play()
 
-                        playSound(config.soundId)
-                        config.lastPlayed = currentTime
-                        config.canPlay = false
+                    local sound = Instance.new("Sound")
+                    sound.SoundId = config.soundId
+                    sound.Volume = 1
+                    sound.PlaybackSpeed = config.soundSpeed or 1
+                    sound.Parent = character:FindFirstChild("HumanoidRootPart") or character
+                    sound:Play()
+                    game:GetService("Debris"):AddItem(sound, 3)
 
-                        movingForward = true
-                        moveEndTime = currentTime + 3
-                    end
-                elseif config == replacements[3] then
-                    if currentTime - config.lastPlayed > 3 and config.canTeleport then
-                        local ballModel = workspace.Terrain:WaitForChild("Ball")
-                        local ballShadow = ballModel:WaitForChild("ballshadow")
-                        local rootPart = character:WaitForChild("HumanoidRootPart")
-                        rootPart.CFrame = ballShadow.CFrame * CFrame.new(0, -5, 0)
-
-                        config.lastPlayed = currentTime
-                        config.canTeleport = false
-                    end
+                    config.lastPlayed = currentTime
+                    config.canPlay = false
                 end
             end
         end
@@ -118,9 +151,6 @@ local function resetAnimationFlags()
         if config.canPlay == false and tick() - config.lastPlayed >= 3 then
             config.canPlay = true
         end
-        if config.canPlay == false and tick() - config.lastPlayed >= 3 then
-            config.canPlay = true
-        end
         if config.canTeleport == false and tick() - config.lastPlayed >= 3 then
             config.canTeleport = true
         end
@@ -146,10 +176,10 @@ local function modifyGUI()
     local toolname2 = baseButton2:WaitForChild("ToolName")
     toolname2.Text = "TP"
 
-    local skill3Button = innerHotbar:FindFirstChild("skill3")
-    if skill3Button then
-        skill3Button:Destroy()
-    end
+    local skill3Button = innerHotbar:WaitForChild("skill3")
+    local baseButton3 = skill3Button:WaitForChild("Base")
+    local toolname3 = baseButton3:WaitForChild("ToolName")
+    toolname3.Text = "EXE Strike"
 
     local skill4Button = innerHotbar:FindFirstChild("skill4")
     if skill4Button then
